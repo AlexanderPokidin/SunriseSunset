@@ -169,15 +169,6 @@ public class SunriseSunsetActivity extends AppCompatActivity {
         }
 
         @Override
-        protected void onProgressUpdate(String... values) {
-            super.onProgressUpdate(values);
-            mTvSunrise.setText(values[0]);
-            mTvSunset.setText(values[1]);
-            Log.d(TAG, "SunriseSunsetAsyncTask: onProgressUpdate was done. mTvSunrise: "
-                    + values[0] + ", mTvSunset: " + values[1]);
-        }
-
-        @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             mTvSunrise.setText(PlaceItem.getPlaceItem().getSunrise());

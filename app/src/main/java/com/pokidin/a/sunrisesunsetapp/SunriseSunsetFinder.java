@@ -15,6 +15,7 @@ import java.net.URL;
 public class SunriseSunsetFinder {
     private static final String TAG = "SunriseSunsetFinder";
 
+
     public String getUrl(String urlStr) throws IOException {
         URL url = new URL(urlStr);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
@@ -37,11 +38,12 @@ public class SunriseSunsetFinder {
         }
     }
 
-    public void findItem() {
+    public void timeFinder() {
         try {
             String url = Uri.parse("https://api.sunrise-sunset.org/json").buildUpon()
-                    .appendQueryParameter("lat", "50.4501")
-                    .appendQueryParameter("lng", "30.5234")
+                    .appendQueryParameter("lat", "" + PlaceItem.getPlaceItem().getLatLocation())
+                    .appendQueryParameter("lng", "" + PlaceItem.getPlaceItem().getLngLocation())
+                    .appendQueryParameter("formatted" , "0")
                     .build().toString();
             String jsonString = getUrl(url);
             Log.i(TAG, "Received JSON: " + jsonString);
@@ -56,10 +58,9 @@ public class SunriseSunsetFinder {
 
     private void parseItem(JSONObject object) throws IOException, JSONException {
         JSONObject jsonObject = object.getJSONObject("results");
-        String strSunrise = jsonObject.getString("sunrise");
-        String strSunset = jsonObject.getString("sunset");
+        PlaceItem.getPlaceItem().setSunrise(jsonObject.getString("sunrise"));
+        PlaceItem.getPlaceItem().setSunset(jsonObject.getString("sunset"));
 
         Log.i(TAG, "Sunrise: " + jsonObject.getString("sunrise") + ". Sunset: " + jsonObject.getString("sunset"));
-
     }
 }

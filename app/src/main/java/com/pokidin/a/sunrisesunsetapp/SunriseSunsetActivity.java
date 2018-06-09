@@ -10,10 +10,15 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+import com.google.android.gms.location.places.ui.PlaceSelectionListener;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 
@@ -27,39 +32,76 @@ public class SunriseSunsetActivity extends AppCompatActivity {
 
     private boolean mLocationPermissionsGranted = false;
     private FusedLocationProviderClient mFusedLocationProviderClient;
-    private Location currentLocation;
+    private Place mPlace;
+
+    private PlaceAutocompleteFragment mAutocompleteFragment;
+    private TextView mTvCity;
+    private TextView mTvSunrise;
+    private TextView mTvSunset;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sunrise_sunset);
 
-        getLocationPermission();
+        mAutocompleteFragment = (PlaceAutocompleteFragment) getFragmentManager()
+                .findFragmentById(R.id.place_autocomplete_fragment);
+        mTvCity = findViewById(R.id.tvCity);
+        mTvSunrise = findViewById(R.id.tvSunriseTime);
+        mTvSunset = findViewById(R.id.tvSunsetTime);
 
-        if (mLocationPermissionsGranted){
+        getLocationPermission();
+        if (mLocationPermissionsGranted) {
             getDeviseLocation();
         }
 
-        new SunriseSunsetAsyncTask().execute();
+        placeFinder();
     }
 
-    private void getDeviseLocation(){
+    private void placeFinder() {
+        mAutocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+            @Override
+            public void onPlaceSelected(Place place) {
+                mTvCity.setText(place.getName().toString());
+                Log.d(TAG, "Place: " + place.getName() + ", LatLng: " + place.getLatLng());
+
+                PlaceItem.getPlaceItem().setLatLocation(place.getLatLng().latitude);
+                PlaceItem.getPlaceItem().setLngLocation(place.getLatLng().longitude);
+
+                new SunriseSunsetAsyncTask().execute();
+            }
+
+            @Override
+            public void onError(Status status) {
+                Log.e(TAG, "An error occurred: " + status);
+            }
+        });
+    }
+
+    private void getDeviseLocation() {
         Log.d(TAG, "getDeviceLocation: getting the devices current location");
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         try {
-            if (mLocationPermissionsGranted){
+            if (mLocationPermissionsGranted) {
 
                 final Task location = mFusedLocationProviderClient.getLastLocation();
                 location.addOnCompleteListener(new OnCompleteListener() {
                     @Override
                     public void onComplete(@NonNull Task task) {
-                        if (task.isSuccessful()){
+                        if (task.isSuccessful()) {
+
                             Log.d(TAG, "onComplete: found location!");
-                            currentLocation = (Location) task.getResult();
+                            Location currentLocation = (Location) task.getResult();
 
                             Log.d(TAG, "Found location: lat " + currentLocation.getLatitude()
                                     + ", lng " + currentLocation.getLongitude());
+
+                            PlaceItem.getPlaceItem().setLatLocation(currentLocation.getLatitude());
+                            PlaceItem.getPlaceItem().setLngLocation(currentLocation.getLongitude());
+
+                            new SunriseSunsetAsyncTask().execute();
+
                         } else {
                             Log.d(TAG, "onComplete: current location is null");
                             Toast.makeText(SunriseSunsetActivity.this,
@@ -69,32 +111,28 @@ public class SunriseSunsetActivity extends AppCompatActivity {
                 });
             }
 
-        } catch (SecurityException se){
-            Log.e(TAG, "getDeviceLocation: SecurityException: " + se.getMessage() );
+        } catch (SecurityException se) {
+            Log.e(TAG, "getDeviceLocation: SecurityException: " + se.getMessage());
         }
     }
 
-    private void sendQuery(Location location){
-
-    }
-
-    private void getLocationPermission(){
+    private void getLocationPermission() {
         String[] permissions = {
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION
         };
 
         if (ContextCompat.checkSelfPermission(this.getApplicationContext(), FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED){
+                == PackageManager.PERMISSION_GRANTED) {
             if (ContextCompat.checkSelfPermission(this.getApplicationContext(), COURSE_LOCATION)
-                    == PackageManager.PERMISSION_GRANTED){
+                    == PackageManager.PERMISSION_GRANTED) {
                 mLocationPermissionsGranted = true;
-            }else {
+            } else {
                 ActivityCompat.requestPermissions(this,
                         permissions,
                         LOCATION_PERMISSION_REQUEST_CODE);
             }
-        }else {
+        } else {
             ActivityCompat.requestPermissions(this,
                     permissions,
                     LOCATION_PERMISSION_REQUEST_CODE);
@@ -106,11 +144,11 @@ public class SunriseSunsetActivity extends AppCompatActivity {
         Log.d(TAG, "onRequestPermissionsResult: called.");
         mLocationPermissionsGranted = false;
 
-        switch (requestCode){
+        switch (requestCode) {
             case LOCATION_PERMISSION_REQUEST_CODE:
-                if (grantResults.length > 0){
-                    for (int i = 0; i < grantResults.length; i++){
-                        if (grantResults[i] != PackageManager.PERMISSION_GRANTED){
+                if (grantResults.length > 0) {
+                    for (int grantResult : grantResults) {
+                        if (grantResult != PackageManager.PERMISSION_GRANTED) {
                             mLocationPermissionsGranted = false;
                             Log.d(TAG, "onRequestPermissionsResult: permission failed");
                             return;
@@ -122,12 +160,29 @@ public class SunriseSunsetActivity extends AppCompatActivity {
         }
     }
 
-    private class SunriseSunsetAsyncTask extends AsyncTask<Void, Void, Void> {
+    private class SunriseSunsetAsyncTask extends AsyncTask<Void, String, Void> {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            new SunriseSunsetFinder().findItem();
+            new SunriseSunsetFinder().timeFinder();
             return null;
+        }
+
+        @Override
+        protected void onProgressUpdate(String... values) {
+            super.onProgressUpdate(values);
+            mTvSunrise.setText(values[0]);
+            mTvSunset.setText(values[1]);
+            Log.d(TAG, "SunriseSunsetAsyncTask: onProgressUpdate was done. mTvSunrise: "
+                    + values[0] + ", mTvSunset: " + values[1]);
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            mTvSunrise.setText(PlaceItem.getPlaceItem().getSunrise());
+            mTvSunset.setText(PlaceItem.getPlaceItem().getSunset());
+            Log.d(TAG, "SunriseSunsetAsyncTask: onPostExecute was done");
         }
     }
 }

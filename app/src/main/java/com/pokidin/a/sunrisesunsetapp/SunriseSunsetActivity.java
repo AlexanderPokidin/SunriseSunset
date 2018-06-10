@@ -78,7 +78,7 @@ public class SunriseSunsetActivity extends AppCompatActivity {
 
     private void getDeviseLocation() {
         Log.d(TAG, "getDeviceLocation: getting the devices current location");
-        FusedLocationProviderClient fusedLocationProviderClient
+        final FusedLocationProviderClient fusedLocationProviderClient
                 = LocationServices.getFusedLocationProviderClient(this);
 
         try {
@@ -92,19 +92,24 @@ public class SunriseSunsetActivity extends AppCompatActivity {
 
                             Log.d(TAG, "onComplete: found location!");
                             Location currentLocation = (Location) task.getResult();
+                            if (currentLocation != null){
+                                Log.d(TAG, "Found location: lat " + currentLocation.getLatitude()
+                                        + ", lng " + currentLocation.getLongitude());
 
-                            Log.d(TAG, "Found location: lat " + currentLocation.getLatitude()
-                                    + ", lng " + currentLocation.getLongitude());
+                                PlaceItem.getPlaceItem().setLatLocation(currentLocation.getLatitude());
+                                PlaceItem.getPlaceItem().setLngLocation(currentLocation.getLongitude());
 
-                            PlaceItem.getPlaceItem().setLatLocation(currentLocation.getLatitude());
-                            PlaceItem.getPlaceItem().setLngLocation(currentLocation.getLongitude());
-
-                            new SunriseSunsetAsyncTask().execute();
-
+                                new SunriseSunsetAsyncTask().execute();
+                            } else {
+                                Log.d(TAG, "onComplete (interior): current location is null");
+                                Toast.makeText(SunriseSunsetActivity.this,
+                                        "Unable to get current location",
+                                        Toast.LENGTH_SHORT).show();
+                            }
                         } else {
-                            Log.d(TAG, "onComplete: current location is null");
+                            Log.d(TAG, "onComplete (external): current location is null");
                             Toast.makeText(SunriseSunsetActivity.this,
-                                    "unable to get current location", Toast.LENGTH_SHORT).show();
+                                    "Unable to get current location", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });

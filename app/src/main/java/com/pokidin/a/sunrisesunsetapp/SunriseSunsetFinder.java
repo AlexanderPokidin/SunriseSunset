@@ -68,33 +68,35 @@ public class SunriseSunsetFinder {
     private void parseItem(JSONObject object) throws ParseException, IOException, JSONException {
         JSONObject jsonObject = object.getJSONObject("results");
 
-        PlaceItem.getPlaceItem().setSunrise(jsonObject.getString("sunrise"));
-        PlaceItem.getPlaceItem().setSunset(jsonObject.getString("sunset"));
+        PlaceItem.getPlaceItem().setSunrise(timeFixer(jsonObject.getString("sunrise")));
+        PlaceItem.getPlaceItem().setSunset(timeFixer(jsonObject.getString("sunset")));
 
         Log.i(TAG, "Sunrise: " + jsonObject.getString("sunrise") + ". Sunset: " + jsonObject.getString("sunset"));
     }
 
-//    private String timeFixer(String time) throws ParseException {
+    private String timeFixer(String time) throws ParseException {
 
 
-//        SimpleDateFormat df = null;
-//        String formattedDate = null;
-//        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-//            df = new SimpleDateFormat("HH:mm:ss");
-//            df.setTimeZone(android.icu.util.TimeZone.getTimeZone("UTC"));
-//            Date date = df.parse(time);
-//            df.setTimeZone(android.icu.util.TimeZone.getDefault());
-//            formattedDate = df.format(date);
-//        } else {
-//            formattedDate = time;
+        SimpleDateFormat df = null;
+        String formattedDate = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            df = new SimpleDateFormat("HH:mm:ss");
+            df.setTimeZone(android.icu.util.TimeZone.getTimeZone("UTC"));
+            Date date = df.parse(time);
+            df.setTimeZone(android.icu.util.TimeZone.getDefault());
+            formattedDate = df.format(date);
+        } else {
+            formattedDate = time;
+            
+
 //
 //            java.text.SimpleDateFormat dateFormat = new java.text.SimpleDateFormat("HH:mm:ss", Locale.getDefault());
 //            Date date = dateFormat.parse(time);
 //            dateFormat.setTimeZone(TimeZone.getDefault());
 //            return dateFormat.format(date);
-//        }
-//        return formattedDate;
+        }
+        return formattedDate;
 
 
-//    }
+    }
 }

@@ -1,6 +1,8 @@
 package com.pokidin.a.sunrisesunsetapp;
 
+import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
+import android.text.format.Time;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -11,6 +13,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.text.ParseException;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public class SunriseSunsetFinder {
     private static final String TAG = "SunriseSunsetFinder";
@@ -43,7 +50,7 @@ public class SunriseSunsetFinder {
             String url = Uri.parse("https://api.sunrise-sunset.org/json").buildUpon()
                     .appendQueryParameter("lat", "" + PlaceItem.getPlaceItem().getLatLocation())
                     .appendQueryParameter("lng", "" + PlaceItem.getPlaceItem().getLngLocation())
-                    .appendQueryParameter("formatted" , "0")
+//                    .appendQueryParameter("formatted" , "0")
                     .build().toString();
             String jsonString = getUrl(url);
             Log.i(TAG, "Received JSON: " + jsonString);
@@ -53,14 +60,41 @@ public class SunriseSunsetFinder {
             Log.e(TAG, "Failed to fetch items", e);
         } catch (JSONException e) {
             Log.e(TAG, "Failed to parse JSON", e);
+        } catch (ParseException e) {
+            Log.e(TAG, "Failed to parse time", e);
         }
     }
 
-    private void parseItem(JSONObject object) throws IOException, JSONException {
+    private void parseItem(JSONObject object) throws ParseException, IOException, JSONException {
         JSONObject jsonObject = object.getJSONObject("results");
+
         PlaceItem.getPlaceItem().setSunrise(jsonObject.getString("sunrise"));
         PlaceItem.getPlaceItem().setSunset(jsonObject.getString("sunset"));
 
         Log.i(TAG, "Sunrise: " + jsonObject.getString("sunrise") + ". Sunset: " + jsonObject.getString("sunset"));
     }
+
+//    private String timeFixer(String time) throws ParseException {
+
+
+//        SimpleDateFormat df = null;
+//        String formattedDate = null;
+//        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+//            df = new SimpleDateFormat("HH:mm:ss");
+//            df.setTimeZone(android.icu.util.TimeZone.getTimeZone("UTC"));
+//            Date date = df.parse(time);
+//            df.setTimeZone(android.icu.util.TimeZone.getDefault());
+//            formattedDate = df.format(date);
+//        } else {
+//            formattedDate = time;
+//
+//            java.text.SimpleDateFormat dateFormat = new java.text.SimpleDateFormat("HH:mm:ss", Locale.getDefault());
+//            Date date = dateFormat.parse(time);
+//            dateFormat.setTimeZone(TimeZone.getDefault());
+//            return dateFormat.format(date);
+//        }
+//        return formattedDate;
+
+
+//    }
 }

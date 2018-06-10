@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SunriseSunset app</string>
+    <string name="app_name">SunriseSunset</string>
     <string name="hello_sun">Hello Sun!</string>
     <string name="city">City</string>
     <string name="sunrise">Sunrise</string>

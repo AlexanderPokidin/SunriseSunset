@@ -2,7 +2,6 @@ package com.pokidin.a.sunrisesunsetapp;
 
 import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
-import android.text.format.Time;
 import android.util.Log;
 
 import org.json.JSONException;
@@ -14,7 +13,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.ParseException;
-import java.time.ZoneId;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -23,7 +21,7 @@ public class SunriseSunsetFinder {
     private static final String TAG = "SunriseSunsetFinder";
 
 
-    public String getUrl(String urlStr) throws IOException {
+    private String getUrl(String urlStr) throws IOException {
         URL url = new URL(urlStr);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 
@@ -50,7 +48,6 @@ public class SunriseSunsetFinder {
             String url = Uri.parse("https://api.sunrise-sunset.org/json").buildUpon()
                     .appendQueryParameter("lat", "" + PlaceItem.getPlaceItem().getLatLocation())
                     .appendQueryParameter("lng", "" + PlaceItem.getPlaceItem().getLngLocation())
-//                    .appendQueryParameter("formatted" , "0")
                     .build().toString();
             String jsonString = getUrl(url);
             Log.i(TAG, "Received JSON: " + jsonString);
@@ -65,7 +62,7 @@ public class SunriseSunsetFinder {
         }
     }
 
-    private void parseItem(JSONObject object) throws ParseException, IOException, JSONException {
+    private void parseItem(JSONObject object) throws ParseException, JSONException {
         JSONObject jsonObject = object.getJSONObject("results");
 
         PlaceItem.getPlaceItem().setSunrise(timeFixer(jsonObject.getString("sunrise")));
@@ -74,29 +71,23 @@ public class SunriseSunsetFinder {
         Log.i(TAG, "Sunrise: " + jsonObject.getString("sunrise") + ". Sunset: " + jsonObject.getString("sunset"));
     }
 
+    //Formatting a sunrise and sunset time for the device settings
+
     private String timeFixer(String time) throws ParseException {
-
-
-        SimpleDateFormat df = null;
-        String formattedDate = null;
+        String formattedDate;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-            df = new SimpleDateFormat("HH:mm:ss");
+            SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
             df.setTimeZone(android.icu.util.TimeZone.getTimeZone("UTC"));
             Date date = df.parse(time);
             df.setTimeZone(android.icu.util.TimeZone.getDefault());
             formattedDate = df.format(date);
         } else {
-            formattedDate = time;
-            
-
-//
-//            java.text.SimpleDateFormat dateFormat = new java.text.SimpleDateFormat("HH:mm:ss", Locale.getDefault());
-//            Date date = dateFormat.parse(time);
-//            dateFormat.setTimeZone(TimeZone.getDefault());
-//            return dateFormat.format(date);
+            java.text.SimpleDateFormat df = new java.text.SimpleDateFormat("HH:mm:ss", Locale.getDefault());
+            df.setTimeZone(TimeZone.getTimeZone("UTC"));
+            Date date = df.parse(time);
+            df.setTimeZone(TimeZone.getDefault());
+            formattedDate = df.format(date);
         }
         return formattedDate;
-
-
     }
 }

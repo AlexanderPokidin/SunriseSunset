@@ -25,13 +25,11 @@ import com.google.android.gms.tasks.Task;
 public class SunriseSunsetActivity extends AppCompatActivity {
 
     private static final String TAG = "SunriseSunsetActivity";
-
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
     private static final String COURSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
 
     private boolean mLocationPermissionsGranted = false;
-
     private PlaceAutocompleteFragment mAutocompleteFragment;
     private TextView mTvCity;
     private TextView mTvSunrise;
@@ -53,10 +51,12 @@ public class SunriseSunsetActivity extends AppCompatActivity {
             getDeviseLocation();
         }
 
-        placeFinder();
+        getPlaceLocation();
     }
 
-    private void placeFinder() {
+    //Selecting the place and getting a location
+
+    private void getPlaceLocation() {
         mAutocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
             @Override
             public void onPlaceSelected(Place place) {
@@ -76,6 +76,8 @@ public class SunriseSunsetActivity extends AppCompatActivity {
         });
     }
 
+    //Getting device location
+
     private void getDeviseLocation() {
         Log.d(TAG, "getDeviceLocation: getting the devices current location");
         final FusedLocationProviderClient fusedLocationProviderClient
@@ -92,7 +94,7 @@ public class SunriseSunsetActivity extends AppCompatActivity {
 
                             Log.d(TAG, "onComplete: found location!");
                             Location currentLocation = (Location) task.getResult();
-                            if (currentLocation != null){
+                            if (currentLocation != null) {
                                 Log.d(TAG, "Found location: lat " + currentLocation.getLatitude()
                                         + ", lng " + currentLocation.getLongitude());
 
@@ -119,6 +121,8 @@ public class SunriseSunsetActivity extends AppCompatActivity {
             Log.e(TAG, "getDeviceLocation: SecurityException: " + se.getMessage());
         }
     }
+
+    //Get permissions to access the device location
 
     private void getLocationPermission() {
         String[] permissions = {
@@ -163,6 +167,8 @@ public class SunriseSunsetActivity extends AppCompatActivity {
                 }
         }
     }
+
+    //Request and receive a sunrise and sunset time from the server
 
     private class SunriseSunsetAsyncTask extends AsyncTask<Void, String, Void> {
 

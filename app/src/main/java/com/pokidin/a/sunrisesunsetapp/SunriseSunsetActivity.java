@@ -61,10 +61,12 @@ public class SunriseSunsetActivity extends AppCompatActivity {
             @Override
             public void onPlaceSelected(Place place) {
                 mTvCity.setText(place.getName().toString());
-                Log.d(TAG, "Place: " + place.getName() + ", LatLng: " + place.getLatLng());
+                Log.d(TAG, "getPlaceLocation. Place: " + place.getName() + ", LatLng: " + place.getLatLng());
 
                 PlaceItem.getPlaceItem().setLatLocation(place.getLatLng().latitude);
                 PlaceItem.getPlaceItem().setLngLocation(place.getLatLng().longitude);
+
+                Log.d(TAG, "getPlaceLocation. latitude: " + place.getLatLng().latitude + ", longitude: " + place.getLatLng().longitude);
 
                 new SunriseSunsetAsyncTask().execute();
             }
@@ -174,7 +176,7 @@ public class SunriseSunsetActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            new SunriseSunsetFinder().timeFinder();
+            new SunriseSunsetFinder().getLocalTime();
             return null;
         }
 

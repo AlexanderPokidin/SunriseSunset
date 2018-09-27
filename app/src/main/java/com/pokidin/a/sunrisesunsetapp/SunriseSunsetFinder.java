@@ -76,7 +76,7 @@ public class SunriseSunsetFinder {
         JSONObject jsonObject = object.getJSONObject("results");
 
         PlaceItem.getPlaceItem().setSunrise(timeFixer(jsonObject.getString("sunrise")));
-        PlaceItem.getPlaceItem().setSunset(jsonObject.getString("sunset"));
+        PlaceItem.getPlaceItem().setSunset(timeFixer(jsonObject.getString("sunset")));
 
         Log.i(TAG, "parseSunriseSunsetData. Check! Sunrise: " + PlaceItem.getPlaceItem().getSunrise()
                 + ". Sunset: " + PlaceItem.getPlaceItem().getSunset());

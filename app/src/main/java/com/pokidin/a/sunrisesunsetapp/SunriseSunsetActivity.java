@@ -54,7 +54,7 @@ public class SunriseSunsetActivity extends AppCompatActivity {
         getPlaceLocation();
     }
 
-    //Selecting the place and getting a location
+    //Select the place and get a location
 
     private void getPlaceLocation() {
         mAutocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
@@ -78,7 +78,7 @@ public class SunriseSunsetActivity extends AppCompatActivity {
         });
     }
 
-    //Getting device location
+    //Get current device location
 
     private void getDeviseLocation() {
         Log.d(TAG, "getDeviceLocation: getting the devices current location");
@@ -170,13 +170,13 @@ public class SunriseSunsetActivity extends AppCompatActivity {
         }
     }
 
-    //Request and receive a sunrise and sunset time from the server
+    //Request and receive a sunrise and sunset times from the server
 
     private class SunriseSunsetAsyncTask extends AsyncTask<Void, String, Void> {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            new SunriseSunsetFinder().getLocalTime();
+            new SunriseSunsetFinder().getSunriseSunsetTime();
             return null;
         }
 

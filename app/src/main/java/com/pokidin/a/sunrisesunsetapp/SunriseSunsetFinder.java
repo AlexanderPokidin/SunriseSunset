@@ -18,9 +18,8 @@ import java.util.TimeZone;
 
 public class SunriseSunsetFinder {
     private static final String TAG = "SunriseSunsetFinder";
-    private static String timeZoneId;
 
-    private String getUrl(String urlStr) throws IOException {
+    private String getSunriseSunsetData(String urlStr) throws IOException {
         URL url = new URL(urlStr);
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
 
@@ -36,6 +35,7 @@ public class SunriseSunsetFinder {
                 out.write(buffer, 0, bytesRead);
             }
             out.close();
+            Log.i(TAG, "getSunriseSunsetData. !!!: " + new String(out.toByteArray()));
             return new String(out.toByteArray());
         } finally {
             urlConnection.disconnect();
@@ -44,22 +44,25 @@ public class SunriseSunsetFinder {
 
     //Getting and calculating local time
 
-    public void getLocalTime() {
+    public void getSunriseSunsetTime() {
 
         try {
             String url = Uri.parse("https://api.sunrise-sunset.org/json").buildUpon()
                     .appendQueryParameter("lat", "" + PlaceItem.getPlaceItem().getLatLocation())
                     .appendQueryParameter("lng", "" + PlaceItem.getPlaceItem().getLngLocation())
-                    .appendQueryParameter("formatted", "0")
+                    .appendQueryParameter("date", "today")
                     .build().toString();
 
-            Log.d(TAG, "getLocalTime. lat:" + "" + PlaceItem.getPlaceItem().getLatLocation()
-                    + "!lng:" + "" + PlaceItem.getPlaceItem().getLngLocation());
-            String jsonString = getUrl(url);
-            Log.i(TAG, "getLocalTime. Received JSON: " + jsonString);
+            Log.d(TAG, "getSunriseSunset. lat:" + "" + PlaceItem.getPlaceItem().getLatLocation()
+                    + ", lng:" + "" + PlaceItem.getPlaceItem().getLngLocation());
+
+            String jsonString = getSunriseSunsetData(url);
+            Log.i(TAG, "getSunriseSunset. URL: " + url);
+            Log.i(TAG, "getSunriseSunset. Received JSON: " + jsonString);
+
             JSONObject object = new JSONObject(jsonString);
-            getTimeZone();
-            parseUtcTime(object);
+            parseSunriseSunsetData(object);
+
         } catch (IOException e) {
             Log.e(TAG, "Failed to fetch items", e);
         } catch (JSONException e) {
@@ -69,59 +72,43 @@ public class SunriseSunsetFinder {
         }
     }
 
-    private void parseUtcTime(JSONObject object) throws ParseException, JSONException {
+    private void parseSunriseSunsetData(JSONObject object) throws ParseException, JSONException {
         JSONObject jsonObject = object.getJSONObject("results");
 
         PlaceItem.getPlaceItem().setSunrise(timeFixer(jsonObject.getString("sunrise")));
-        PlaceItem.getPlaceItem().setSunset(timeFixer(jsonObject.getString("sunset")));
+        PlaceItem.getPlaceItem().setSunset(jsonObject.getString("sunset"));
 
-        Log.i(TAG, "parseUtcTime. Check! Sunrise: " + PlaceItem.getPlaceItem().getSunrise()
+        Log.i(TAG, "parseSunriseSunsetData. Check! Sunrise: " + PlaceItem.getPlaceItem().getSunrise()
                 + ". Sunset: " + PlaceItem.getPlaceItem().getSunset());
     }
 
     //Getting timezone for local time calculation
 
-    private void getTimeZone() {
-        try {
-            String url = Uri.parse("https://maps.googleapis.com/maps/api/timezone/json").buildUpon()
-                    .appendQueryParameter("location", "" + PlaceItem.getPlaceItem().getLatLocation()
-                            + "," + PlaceItem.getPlaceItem().getLngLocation())
-                    .appendQueryParameter("timestamp", getTimestamp())
-                    .build().toString();
-            String jsonString = getUrl(url);
-            Log.i(TAG, "getTimeZone. Received JSON: " + jsonString);
-            JSONObject object = new JSONObject(jsonString);
-            parseTimeZone(object);
-        } catch (IOException e) {
-            Log.e(TAG, "Failed to fetch items", e);
-        } catch (JSONException e) {
-            Log.e(TAG, "Failed to parse JSON", e);
-        } catch (ParseException e) {
-            Log.e(TAG, "Failed to parse timezone", e);
-        }
-    }
 
-    private void parseTimeZone(JSONObject object) throws ParseException, JSONException {
-        object.getString("dstOffset");
-        object.getString("rawOffset");
-        timeZoneId = object.getString("timeZoneId");
 
-        Log.d(TAG, "parseTimeZone. timeZoneId: " + object.getString("timeZoneId"));
-    }
+
 
     //Formatting a sunrise and sunset time for the local time
 
     private String timeFixer(String utcTime) throws ParseException {
-        String formattedTime;
-        String pattern = "yyyy-MM-dd'T'HH:mm:ssZ";
-        java.text.SimpleDateFormat sdf = new SimpleDateFormat(pattern);
-        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        Date date = sdf.parse(utcTime);
-        sdf = new SimpleDateFormat("HH:mm:ss");
-        sdf.setTimeZone(TimeZone.getTimeZone(timeZoneId));
-        formattedTime = sdf.format(date);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("h:mm:ss a");
+        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        Date date = simpleDateFormat.parse(utcTime);
+        simpleDateFormat.setTimeZone(TimeZone.getDefault());
+        String formattedTime = simpleDateFormat.format(date);
+//
+//
+//
+//        String pattern = "h:mm:ss a";
+//        java.text.SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+//        sdf.setTimeZone();
+//        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+//        Date date = sdf.parse(utcTime);
+//        sdf = new SimpleDateFormat("HH:mm:ss");
+//        sdf.setTimeZone(TimeZone.getTimeZone(timeZoneId));
+//        formattedTime = sdf.format(date);
 
-        Log.d(TAG, "timeFixer. timeFixer: " + timeZoneId + ", formattedTime: " + formattedTime);
+        Log.d(TAG, "timeFixer. timeFixer: " + formattedTime);
 
         return formattedTime;
     }

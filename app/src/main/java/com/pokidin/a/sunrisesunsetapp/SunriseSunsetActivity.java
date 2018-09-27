@@ -176,7 +176,7 @@ public class SunriseSunsetActivity extends AppCompatActivity {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            new SunriseSunsetFinder().getLocalTime();
+            new SunriseSunsetFinder().getSunriseSunsetTime();
             return null;
         }
 

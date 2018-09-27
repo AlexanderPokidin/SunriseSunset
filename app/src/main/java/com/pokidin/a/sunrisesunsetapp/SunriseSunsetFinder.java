@@ -35,14 +35,12 @@ public class SunriseSunsetFinder {
                 out.write(buffer, 0, bytesRead);
             }
             out.close();
-            Log.i(TAG, "getSunriseSunsetData. !!!: " + new String(out.toByteArray()));
+            Log.d(TAG, "getSunriseSunsetData. !!!: " + new String(out.toByteArray()));
             return new String(out.toByteArray());
         } finally {
             urlConnection.disconnect();
         }
     }
-
-    //Getting and calculating local time
 
     public void getSunriseSunsetTime() {
 
@@ -52,13 +50,9 @@ public class SunriseSunsetFinder {
                     .appendQueryParameter("lng", "" + PlaceItem.getPlaceItem().getLngLocation())
                     .appendQueryParameter("date", "today")
                     .build().toString();
-
-            Log.d(TAG, "getSunriseSunset. lat:" + "" + PlaceItem.getPlaceItem().getLatLocation()
-                    + ", lng:" + "" + PlaceItem.getPlaceItem().getLngLocation());
-
             String jsonString = getSunriseSunsetData(url);
-            Log.i(TAG, "getSunriseSunset. URL: " + url);
-            Log.i(TAG, "getSunriseSunset. Received JSON: " + jsonString);
+            Log.d(TAG, "getSunriseSunset. URL: " + url);
+            Log.d(TAG, "getSunriseSunset. Received JSON: " + jsonString);
 
             JSONObject object = new JSONObject(jsonString);
             parseSunriseSunsetData(object);
@@ -74,21 +68,13 @@ public class SunriseSunsetFinder {
 
     private void parseSunriseSunsetData(JSONObject object) throws ParseException, JSONException {
         JSONObject jsonObject = object.getJSONObject("results");
-
         PlaceItem.getPlaceItem().setSunrise(timeFixer(jsonObject.getString("sunrise")));
         PlaceItem.getPlaceItem().setSunset(timeFixer(jsonObject.getString("sunset")));
-
-        Log.i(TAG, "parseSunriseSunsetData. Check! Sunrise: " + PlaceItem.getPlaceItem().getSunrise()
+        Log.d(TAG, "parseSunriseSunsetData. Check! Sunrise: " + PlaceItem.getPlaceItem().getSunrise()
                 + ". Sunset: " + PlaceItem.getPlaceItem().getSunset());
     }
 
-    //Getting timezone for local time calculation
-
-
-
-
-
-    //Formatting a sunrise and sunset time for the local time
+    //Convert a sunrise and sunset times to local time
 
     private String timeFixer(String utcTime) throws ParseException {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("h:mm:ss a");
@@ -96,25 +82,7 @@ public class SunriseSunsetFinder {
         Date date = simpleDateFormat.parse(utcTime);
         simpleDateFormat.setTimeZone(TimeZone.getDefault());
         String formattedTime = simpleDateFormat.format(date);
-//
-//
-//
-//        String pattern = "h:mm:ss a";
-//        java.text.SimpleDateFormat sdf = new SimpleDateFormat(pattern);
-//        sdf.setTimeZone();
-//        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-//        Date date = sdf.parse(utcTime);
-//        sdf = new SimpleDateFormat("HH:mm:ss");
-//        sdf.setTimeZone(TimeZone.getTimeZone(timeZoneId));
-//        formattedTime = sdf.format(date);
-
-        Log.d(TAG, "timeFixer. timeFixer: " + formattedTime);
-
+        Log.d(TAG, "timeFixer: " + formattedTime);
         return formattedTime;
-    }
-
-    private String getTimestamp() {
-        Long tsLong = System.currentTimeMillis() / 1000;
-        return tsLong.toString();
     }
 }

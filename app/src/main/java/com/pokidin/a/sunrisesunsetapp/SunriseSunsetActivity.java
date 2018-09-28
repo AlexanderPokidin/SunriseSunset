@@ -25,12 +25,16 @@ import com.google.android.gms.tasks.Task;
 public class SunriseSunsetActivity extends AppCompatActivity {
 
     private static final String TAG = "SunriseSunsetActivity";
+
     private static final String FINE_LOCATION = Manifest.permission.ACCESS_FINE_LOCATION;
     private static final String COURSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
 
+    private static final String STATE_CITY = "playerCity";
+
     private boolean mLocationPermissionsGranted = false;
     private PlaceAutocompleteFragment mAutocompleteFragment;
+
     private TextView mTvCity;
     private TextView mTvSunrise;
     private TextView mTvSunset;
@@ -61,6 +65,8 @@ public class SunriseSunsetActivity extends AppCompatActivity {
             @Override
             public void onPlaceSelected(Place place) {
                 mTvCity.setText(place.getName().toString());
+                PlaceItem.getPlaceItem().setName(place.getName().toString());
+                Log.d(TAG, "CityName: " + PlaceItem.getPlaceItem().getName());
                 Log.d(TAG, "getPlaceLocation. Place: " + place.getName() + ", LatLng: " + place.getLatLng());
 
                 PlaceItem.getPlaceItem().setLatLocation(place.getLatLng().latitude);

@@ -51,6 +51,12 @@ public class SunriseSunsetActivity extends AppCompatActivity {
         if (PlaceItem.getPlaceItem().getName() != null){
             mTvCity.setText(PlaceItem.getPlaceItem().getName());
         }
+        if (PlaceItem.getPlaceItem().getSunrise() != null){
+            mTvSunrise.setText(PlaceItem.getPlaceItem().getSunrise());
+        }
+        if (PlaceItem.getPlaceItem().getSunset() != null){
+            mTvSunset.setText(PlaceItem.getPlaceItem().getSunset());
+        }
 
         getLocationPermission();
         if (mLocationPermissionsGranted) {

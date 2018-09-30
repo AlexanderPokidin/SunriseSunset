@@ -30,8 +30,6 @@ public class SunriseSunsetActivity extends AppCompatActivity {
     private static final String COURSE_LOCATION = Manifest.permission.ACCESS_COARSE_LOCATION;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1234;
 
-    private static final String STATE_CITY = "playerCity";
-
     private boolean mLocationPermissionsGranted = false;
     private PlaceAutocompleteFragment mAutocompleteFragment;
 
@@ -49,6 +47,16 @@ public class SunriseSunsetActivity extends AppCompatActivity {
         mTvCity = findViewById(R.id.tvCity);
         mTvSunrise = findViewById(R.id.tvSunriseTime);
         mTvSunset = findViewById(R.id.tvSunsetTime);
+
+        if (PlaceItem.getPlaceItem().getName() != null){
+            mTvCity.setText(PlaceItem.getPlaceItem().getName());
+        }
+        if (PlaceItem.getPlaceItem().getSunrise() != null){
+            mTvSunrise.setText(PlaceItem.getPlaceItem().getSunrise());
+        }
+        if (PlaceItem.getPlaceItem().getSunset() != null){
+            mTvSunset.setText(PlaceItem.getPlaceItem().getSunset());
+        }
 
         getLocationPermission();
         if (mLocationPermissionsGranted) {
